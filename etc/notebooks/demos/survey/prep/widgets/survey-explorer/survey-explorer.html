@@ -10,7 +10,7 @@ Example:
 @element survey-explorer
 -->
 <dom-module id="survey-explorer">
-    <template is="dom-bind">
+    <template>
         <paper-dropdown-menu label="Choose a series" noink no-animations selected-item-label="{{selectedLabel}}">
             <paper-menu class="dropdown-content" selected="0">
                 <template is="dom-repeat" items="[[labelSlice(labels,series)]]">
@@ -54,10 +54,10 @@ Example:
         </div>
         <content></content>
     </template>
-</dom-module>
-<script>
+    <script>
     'use strict';
-    Polymer({
+    Urth.whenReady(function() {
+      Polymer({
         is: 'survey-explorer',
         properties: {
             series: Array,
@@ -105,5 +105,7 @@ Example:
             }
             return text;
         }
+      });
     });
-</script>
+    </script>
+</dom-module>

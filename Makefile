@@ -347,7 +347,7 @@ else
 	$(MAKE) start-selenium
 	$(MAKE) sdist
 	@echo 'Starting system integration tests locally...'
-	BASEURL=$(BASEURL) BROWSER_LIST="$(BROWSER_LIST)" TEST_TYPE=local $(MAKE) run-test || (docker rm -f $(SERVER_NAME); -kill `cat SELENIUM_PID`; rm SELENIUM_PID; exit 1)
+	BASEURL=$(BASEURL) BROWSER_LIST="$(BROWSER_LIST)" TEST_TYPE=local $(MAKE) run-test || (docker rm -f $(SERVER_NAME); kill `cat SELENIUM_PID`; rm SELENIUM_PID; exit 1)
 	-@kill `cat SELENIUM_PID`
 	-@rm SELENIUM_PID
 endif
