@@ -1,7 +1,9 @@
 
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../bower_components/iron-component-page/iron-component-page.html">
 <link rel="import" href="../../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../../bower_components/marked-element/marked-element.html">
 <link rel="import" href="../../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../../../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -10,6 +12,9 @@
 <dom-module id='urth-docs-panel'>
     <template>
         <style>
+            .hideDoc {
+                display: none;
+            }
             .iron-selected.selectable {
                 background: #fafafa;
                 color: #000000;
@@ -99,7 +104,10 @@
                 <paper-toolbar class="elementbar">
                     <a class="project-name" href$="[[homeUrl]]">Jupyter Declaritive Widgets</a>
                 </paper-toolbar>
-                <iron-selector id="selector" attr-for-selected="name" selectable=".selectable" selected="{{activeDescriptor}}">
+                <iron-selector id="selector" attr-for-selected="name" selectable=".selectable" selected="{{docSelected}}" fallback-selection="doc1">
+                    <div class="selector-header">Usage</div>
+                        <div class="selectable" name="doc1">Doc 1</div>
+                        <div class="selectable" name="doc2">Doc 2</div>
                     <div class="selector-header">Elements</div>
                     <template is="dom-repeat" items="[[elementDescriptors]]">
                         <div class="selectable" name="[[item.is]]">[[item.is]]</div>
@@ -108,7 +116,7 @@
                     <template is="dom-repeat" items="[[behaviorDescriptors]]">
                         <div class="selectable" name="[[item.is]]">[[item.is]]</div>
                     </template>
-                <iron-selector>
+                </iron-selector>
             </paper-header-panel>
             <paper-header-panel main mode="waterfall">
                 <paper-toolbar class="navbar">
@@ -117,11 +125,20 @@
                         <a class="top-nav-item" href$="[[repositoryUrl]]">Repository</a>
                     </template>
                 </paper-toolbar>
-                <iron-component-page catalog active="{{activeDescriptor}}" doc-elements="{{elementDescriptors}}"
-                        doc-behaviors="{{behaviorDescriptors}}" doc-src="[[docSrc]]">
-                </iron-component-page>
+                <template is="dom-if" if="[[isMarkdown]]">
+                    <iron-ajax auto url="[[markdownURL]]" handle-as="text" last-response="{{markdownDocContent}}"></iron-ajax>
+                    <marked-element markdown="[[markdownDocContent]]">
+                        <div class="markdown-html"></div>
+                    </marked-element>
+                </template>
+                <template is="dom-if" if="[[!isMarkdown]]">
+                    <iron-doc-viewer descriptor="[[docDescriptor]]"></iron-doc-viewer>
+                </template>
             </paper-header-panel>
         </paper-drawer-panel>
+        <iron-component-page id="ironComponentPage" catalog active="{{activeDescriptor}}" doc-elements="{{elementDescriptors}}"
+                        doc-behaviors="{{behaviorDescriptors}}" doc-src="[[docSrc]]" style="display:none;">
+        </iron-component-page>
     </template>
 
     <script>
@@ -143,6 +160,17 @@
             homeUrl: {
                 type: String,
                 value: '.'
+            },
+            usageTopics: {
+                type: Array,
+                value: ["doc1", "doc2"]
+            },
+            isMarkdown: {
+                type: Boolean,
+                computed: 'isDocMarkdown(docSelected)'
+            },
+            docSelected: {
+                observer: '_docSelectedChanged'
             }
         },
 
@@ -152,6 +180,33 @@
                     this.$.drawerPanel.closeDrawer();
                 }
             }.bind(this));
+        },
+
+        isDocMarkdown: function(doc) {
+            if(this.usageTopics) {
+                return this.usageTopics.indexOf(doc) > -1;
+            }
+        },
+
+        _docSelectedChanged: function(docSelected) {
+            if (!this.isDocMarkdown(docSelected)) {
+                this.activeDescriptor = docSelected;
+                this.docDescriptor = null;
+                for (var i = 0; i < this.$.ironComponentPage.docElements.length; i++) {
+                    if (this.$.ironComponentPage.docElements[i].is === docSelected) {
+                        this.docDescriptor = this.$.ironComponentPage.docElements[i];
+                        break;
+                    }
+                }
+                for (var i = 0; i < this.$.ironComponentPage.docBehaviors.length; i++) {
+                    if (this.$.ironComponentPage.docBehaviors[i].is === docSelected) {
+                        this.docDescriptor = this.$.ironComponentPage.docBehaviors[i];
+                        break;
+                    }
+                }
+            } else {
+                this.markdownURL = '../../usage-docs/' + docSelected + '.md';
+            }
         }
     });
     </script>
