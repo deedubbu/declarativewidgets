@@ -104,10 +104,11 @@
                 <paper-toolbar class="elementbar">
                     <a class="project-name" href$="[[homeUrl]]">Jupyter Declaritive Widgets</a>
                 </paper-toolbar>
-                <iron-selector id="selector" attr-for-selected="name" selectable=".selectable" selected="{{docSelected}}" fallback-selection="doc1">
+                <iron-selector id="selector" attr-for-selected="name" selectable=".selectable" selected="{{docSelected}}" fallback-selection="[[urthDocs.0.title]]">
                     <div class="selector-header">Usage</div>
-                        <div class="selectable" name="doc1">Doc 1</div>
-                        <div class="selectable" name="doc2">Doc 2</div>
+                    <template is="dom-repeat" items="[[urthDocs]]">
+                        <div class="selectable" name="[[item.title]]">[[item.title]]</div>
+                    </template>
                     <div class="selector-header">Elements</div>
                     <template is="dom-repeat" items="[[elementDescriptors]]">
                         <div class="selectable" name="[[item.is]]">[[item.is]]</div>
@@ -151,6 +152,9 @@
              * @attribute datarows
              * @type Array
              */
+            urthDocs: {
+                type: Array
+            },
             docSrc: {
                 type: String
             },
@@ -161,10 +165,6 @@
                 type: String,
                 value: '.'
             },
-            usageTopics: {
-                type: Array,
-                value: ["doc1", "doc2"]
-            },
             isMarkdown: {
                 type: Boolean,
                 computed: 'isDocMarkdown(docSelected)'
@@ -172,6 +172,16 @@
             docSelected: {
                 observer: '_docSelectedChanged'
             }
+        },
+
+        findDocFileByDocTitle: function(docTitle) {
+            var docFile = null;
+            this.urthDocs.some(function(docObj) {
+                if(docObj.title === docTitle) {
+                    docFile = docObj.file;
+                }
+            });
+            return docFile;
         },
 
         ready: function() {
@@ -183,9 +193,7 @@
         },
 
         isDocMarkdown: function(doc) {
-            if(this.usageTopics) {
-                return this.usageTopics.indexOf(doc) > -1;
-            }
+            return this.findDocFileByDocTitle(doc) !== null;
         },
 
         _docSelectedChanged: function(docSelected) {
@@ -205,7 +213,7 @@
                     }
                 }
             } else {
-                this.markdownURL = '../../usage-docs/' + docSelected + '.md';
+                this.markdownURL = '../../usage-docs/' + this.findDocFileByDocTitle(docSelected);
             }
         }
     });
