@@ -75,6 +75,57 @@
                 text-decoration: none;
             }
 
+            .doc-container {
+                padding: 20px;
+                margin: 0 auto;
+                max-width: 48em;
+            }
+
+            .doc-heading {
+                color: #424242;
+                font-family: 'Roboto','Noto',sans-serif;
+                -webkit-font-smoothing: antialiased;
+                white-space: nowrap;
+                font-size: 20px;
+                font-weight: 500;
+                line-height: 28px;
+            }
+
+            .urth-docs {
+                font-family: 'Roboto','Noto',sans-serif;
+                -webkit-font-smoothing: antialiased;
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 20px;
+                color: #212121;
+            }
+
+            .urth-docs code {
+                font-family: 'Roboto Mono','Consolas','Menlo',monospace;
+                -webkit-font-smoothing: antialiased;
+                font-size: 14px;
+                font-weight: 500;
+                line-height: 20px;
+                background: #eeeeee;
+                padding: 3px;
+                border-radius: 3px;
+            }
+
+            .urth-docs blockquote {
+                padding: 0 15px;
+                color: #777;
+                border-left: 4px solid #ddd;
+            }
+
+            .urth-docs pre {
+                background-color: #eeeeee;
+                border-radius: 3px;
+                font-size: 15px;
+                overflow-x: auto;
+                padding: 12px 24px;
+                word-wrap: break-word;
+            }
+
             paper-header-panel[drawer] {
                 --paper-header-panel-waterfall-container: {
                     background: #343131;
@@ -126,15 +177,19 @@
                         <a class="top-nav-item" href$="[[repositoryUrl]]">Repository</a>
                     </template>
                 </paper-toolbar>
-                <template is="dom-if" if="[[isMarkdown]]">
-                    <iron-ajax auto url="[[markdownURL]]" handle-as="text" last-response="{{markdownDocContent}}"></iron-ajax>
-                    <marked-element markdown="[[markdownDocContent]]">
-                        <div class="markdown-html"></div>
-                    </marked-element>
-                </template>
-                <template is="dom-if" if="[[!isMarkdown]]">
-                    <iron-doc-viewer descriptor="[[docDescriptor]]"></iron-doc-viewer>
-                </template>
+                <div class="doc-container">
+                    <template is="dom-if" if="[[isMarkdown]]">
+                        <h2 class="doc-heading">[[docSelected]]</h2>
+                        <iron-ajax auto url="[[markdownURL]]" handle-as="text" last-response="{{markdownDocContent}}"></iron-ajax>
+                        <marked-element markdown="[[markdownDocContent]]">
+                            <div class="markdown-html urth-docs"></div>
+                        </marked-element>
+                    </template>
+                    <template is="dom-if" if="[[!isMarkdown]]">
+                        <h2 class="doc-heading">[[docSelected]]</h2>
+                        <iron-doc-viewer descriptor="[[docDescriptor]]"></iron-doc-viewer>
+                    </template>
+                </div>
             </paper-header-panel>
         </paper-drawer-panel>
         <iron-component-page id="ironComponentPage" catalog active="{{activeDescriptor}}" doc-elements="{{elementDescriptors}}"
@@ -213,7 +268,7 @@
                     }
                 }
             } else {
-                this.markdownURL = '../../usage-docs/' + this.findDocFileByDocTitle(docSelected);
+                this.markdownURL = '../../' + this.findDocFileByDocTitle(docSelected);
             }
         }
     });
