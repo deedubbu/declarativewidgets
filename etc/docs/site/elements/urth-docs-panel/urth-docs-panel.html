@@ -132,6 +132,12 @@
                  };
             }
 
+            paper-header-panel[main] {
+                --paper-header-panel-waterfall-container: {
+                    background: #fafafa;
+                 };
+            }
+
             paper-toolbar {
                 --paper-toolbar: {
                     font-family: "Helvetica Neue",Arial,sans-serif;
@@ -170,7 +176,7 @@
                     </template>
                 </iron-selector>
             </paper-header-panel>
-            <paper-header-panel main mode="waterfall">
+            <paper-header-panel id="contentHeaderPanel" main mode="waterfall">
                 <paper-toolbar class="navbar">
                     <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
                     <template is="dom-if" if="[[repositoryUrl]]">
@@ -187,12 +193,13 @@
                     </template>
                     <template is="dom-if" if="[[!isMarkdown]]">
                         <h2 class="doc-heading">[[docSelected]]</h2>
-                        <iron-doc-viewer descriptor="[[docDescriptor]]"></iron-doc-viewer>
+                        <iron-doc-viewer descriptor="[[docDescriptor]]"
+                            on-iron-doc-viewer-component-selected="_handleComponentSelectedEvent"></iron-doc-viewer>
                     </template>
                 </div>
             </paper-header-panel>
         </paper-drawer-panel>
-        <iron-component-page id="ironComponentPage" catalog active="{{activeDescriptor}}" doc-elements="{{elementDescriptors}}"
+        <iron-component-page id="ironComponentPage" catalog doc-elements="{{elementDescriptors}}"
                         doc-behaviors="{{behaviorDescriptors}}" doc-src="[[docSrc]]" style="display:none;">
         </iron-component-page>
     </template>
@@ -253,7 +260,6 @@
 
         _docSelectedChanged: function(docSelected) {
             if (!this.isDocMarkdown(docSelected)) {
-                this.activeDescriptor = docSelected;
                 this.docDescriptor = null;
                 for (var i = 0; i < this.$.ironComponentPage.docElements.length; i++) {
                     if (this.$.ironComponentPage.docElements[i].is === docSelected) {
@@ -270,7 +276,12 @@
             } else {
                 this.markdownURL = '../../' + this.findDocFileByDocTitle(docSelected);
             }
-        }
+            this.$.contentHeaderPanel.scroller.scrollTop = 0;
+        },
+
+        _handleComponentSelectedEvent: function(ev) {
+            this.docSelected = ev.detail;
+        },
     });
     </script>
 </dom-module>
